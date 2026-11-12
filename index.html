@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeonBeat Music Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0b0f19',
+                        panelBg: '#111827',
+                        neonCyan: '#00f2fe',
+                        neonPink: '#fe0095',
+                        neonPurple: '#9d4edd',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="h-screen overflow-hidden flex flex-col justify-between selection:bg-neonPink selection:text-white">
+
+    <!-- TOP HEADER & AD BANNER -->
+    <header class="w-full bg-gradient-to-r from-panelBg via-gray-900 to-panelBg border-b border-gray-800 py-2.5 px-3 shrink-0 shadow-lg relative overflow-hidden z-30">
+        <div class="absolute inset-0 bg-[radial-gradient(#00f2fe_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none"></div>
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 relative z-10">
+            
+            <!-- Логотип -->
+            <div class="flex items-center space-x-2 shrink-0">
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-neonCyan to-neonPink flex items-center justify-center shadow-md shadow-neonCyan/20">
+                    <i class="fa-solid fa-headphones-simple text-gray-950 font-bold text-xs"></i>
+                </div>
+                <div>
+                    <span class="text-sm md:text-xl font-bold tracking-wider bg-gradient-to-r from-neonCyan via-white to-neonPink bg-clip-text text-transparent block leading-none">NEONBEAT</span>
+                    <span class="text-[9px] tracking-widest text-neonCyan font-mono uppercase mt-0.5 block">by MasterTJK</span>
+                </div>
+            </div>
+            
+            <!-- Рекламный блок -->
+            <div class="flex flex-1 max-w-sm md:max-w-2xl mx-2 bg-black/40 border border-neonCyan/30 rounded-xl py-1.5 px-3 items-center justify-center backdrop-blur-md shadow-[0_0_15px_rgba(0,242,254,0.1)] min-w-0">
+                <span class="hidden sm:inline-block text-[10px] uppercase tracking-widest text-neonCyan font-semibold mr-2 bg-neonCyan/10 px-1.5 py-0.5 rounded">Реклама</span>
+                <span id="ad-banner-text" class="text-[11px] md:text-sm font-bold tracking-wider text-white ad-text-glow uppercase truncate">Здесь может быть ваша реклама</span>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- MOBILE TABS BAR -->
+    <div id="mobile-tabs" class="flex md:hidden bg-panelBg border-b border-gray-800 shrink-0 z-20">
+        <button onclick="switchTab('menu')" id="tab-btn-menu" class="flex-1 py-2.5 text-center text-xs font-semibold text-neonCyan border-b-2 border-neonCyan bg-gray-900/50">Меню</button>
+        <button onclick="switchTab('tracks')" id="tab-btn-tracks" class="flex-1 py-2.5 text-center text-xs font-semibold text-gray-400 border-b-2 border-transparent">Музыка</button>
+        <button onclick="switchTab('player')" id="tab-btn-player" class="flex-1 py-2.5 text-center text-xs font-semibold text-gray-400 border-b-2 border-transparent">Плеер & Отзывы</button>
+    </div>
+
+    <!-- MAIN CONTENT AREA (3 Columns) -->
+    <main class="flex-1 flex overflow-hidden relative pb-16 md:pb-0">
+
+        <!-- COLUMN 1: LEFT MENU -->
+        <aside id="col-menu" class="w-full md:w-1/4 bg-panelBg/90 border-r border-gray-800/80 flex flex-col h-full overflow-y-auto shrink-0">
+            <div class="p-4 border-b border-gray-800 flex items-center justify-between">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400">Выбор страны</h3>
+                <i class="fa-solid fa-globe text-neonCyan text-sm"></i>
+            </div>
+            
+            <div class="p-3 space-y-2 flex-1">
+                <!-- Россия -->
+                <div>
+                    <button onclick="toggleCountry('russia')" class="w-full flex items-center justify-between p-3 rounded-xl bg-gray-900/60 hover:bg-gray-800/80 transition border border-transparent hover:border-neonCyan/30 group">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-xl">🇷🇺</span>
+                            <span class="font-medium text-sm text-gray-200 group-hover:text-neonCyan transition">Россия</span>
+                        </div>
+                        <i id="icon-russia" class="fa-solid fa-chevron-right text-xs text-gray-500 transition-transform"></i>
+                    </button>
+                    <div id="sub-russia" class="hidden pl-9 pr-2 py-2 space-y-1 bg-black/20 rounded-b-xl my-1 border-l border-neonCyan/40">
+                        <button onclick="filterMusic('Россия', 'Хип-хоп')" class="w-full text-left py-1.5 px-2 rounded text-xs text-gray-400 hover:text-white hover:bg-gray-800 transition">Хип-хоп</button>
+                        <button onclick="filterMusic('Россия', 'Поп')" class="w-full text-left py-1.5 px-2 rounded text-xs text-gray-400 hover:text-white hover:bg-gray-800 transition">Поп</button>
+                        <button onclick="filterMusic('Россия', 'Рок')" class="w-full text-left py-1.5 px-2 rounded text-xs text-gray-400 hover:text-white hover:bg-gray-800 transition">Рок</button>
+                    </div>
+                </div>
+
+                <!-- Узбекистан -->
+                <div>
+                    <button onclick="toggleCountry('uzbekistan')" class="w-full flex items-center justify-between p-3 rounded-xl bg-gray-900/60 hover:bg-gray-800/80 transition border border-transparent hover:border-neonPink/30 group">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-xl">🇺🇿</span>
+                            <span class="font-medium text-sm text-gray-200 group-hover:text-neonPink transition">Узбекистан</span>
+                        </div>
+                        <i id="icon-uzbekistan" class="fa-solid fa-chevron-right text-xs text-gray-500 transition-transform"></i>
+                    </button>
+                    <div id="sub-uzbekistan" class="hidden pl-9 pr-2 py-2 space-y-1 bg-black/20 rounded-b-xl my-1 border-l border-neonPink/40">
+                        <button onclick="filterMusic('Узбекистан', 'Хип-хоп')" class="w-full text-left py-1.5 px-2 rounded text-xs text-gray-400 hover:text-white hover:bg-gray-800 transition">Хип-хоп</button>
+                        <button onclick="filterMusic('Узбекистан', 'Поп')" class="w-full text-left py-1.5 px-2 rounded text-xs text-gray-400 hover:text-white hover:bg-gray-800 transition">Поп</button>
+                        <button onclick="filterMusic('Узбекистан', 'Рок')" class="w-full text-left py-1.5 px-2 rounded text-xs text-gray-400 hover:text-white hover:bg-gray-800 transition">Рок</button>
+                    </div>
+                </div>
+
+                <!-- Таджикистан -->
+                <div>
+                    <button onclick="toggleCountry('tajikistan')" class="w-full flex items-center justify-between p-3 rounded-xl bg-gray-900/60 hover:bg-gray-800/80 transition border border-transparent hover:border-neonPurple/30 group">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-xl">🇹🇯</span>
+                            <span class="font-medium text-sm text-gray-200 group-hover:text-neonPurple transition">Таджикистан</span>
+                        </div>
+                        <i id="icon-tajikistan" class="fa-solid fa-chevron-right text-xs text-gray-500 transition-transform"></i>
+                    </button>
+                    <div id="sub-tajikistan" class="hidden pl-9 pr-2 py-2 space-y-1 bg-black/20 rounded-b-xl my-1 border-l border-neonPurple/40">
+                        <button onclick="filterMusic('Таджикистан', 'Хип-хоп')" class="w-full text-left py-1.5 px-2 rounded text-xs text-gray-400 hover:text-white hover:bg-gray-800 transition">Хип-хоп</button>
+                        <button onclick="filterMusic('Таджикистан', 'Поп')" class="w-full text-left py-1.5 px-2 rounded text-xs text-gray-400 hover:text-white hover:bg-gray-800 transition">Поп</button>
+                        <button onclick="filterMusic('Таджикистан', 'Рок')" class="w-full text-left py-1.5 px-2 rounded text-xs text-gray-400 hover:text-white hover:bg-gray-800 transition">Рок</button>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-gray-800/80 mt-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 px-3 mb-2 flex items-center justify-between">
+                        <span>Общие жанры</span>
+                        <i class="fa-solid fa-music text-neonPink text-sm"></i>
+                    </h3>
+                    <div class="space-y-1">
+                        <button onclick="filterMusic('Все', 'Все Жанры')" class="w-full text-left py-2 px-3 rounded-xl text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-800/60 transition flex items-center space-x-2">
+                            <i class="fa-solid fa-fire text-neonPink"></i>
+                            <span>Все треки</span>
+                        </button>
+                        <button onclick="filterMusic('Все', 'Хип-хоп')" class="w-full text-left py-2 px-3 rounded-xl text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-800/60 transition flex items-center space-x-2">
+                            <i class="fa-solid fa-microphone-lines text-neonCyan"></i>
+                            <span>Хип-хоп</span>
+                        </button>
+                        <button onclick="filterMusic('Все', 'Поп')" class="w-full text-left py-2 px-3 rounded-xl text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-800/60 transition flex items-center space-x-2">
+                            <i class="fa-solid fa-compact-disc text-yellow-400"></i>
+                            <span>Поп</span>
+                        </button>
+                        <button onclick="filterMusic('Все', 'Рок')" class="w-full text-left py-2 px-3 rounded-xl text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-800/60 transition flex items-center space-x-2">
+                            <i class="fa-solid fa-guitar text-red-400"></i>
+                            <span>Рок</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-4 border-t border-gray-800/80 text-center text-[11px] text-gray-500">
+                &copy; 2026 NeonBeat by MasterTJK
+            </div>
+        </aside>
+
+        <!-- COLUMN 2: CENTER VIEW (Tracks) -->
+        <section id="col-tracks" class="w-full md:w-2/4 bg-darkBg flex flex-col h-full overflow-y-auto border-r border-gray-800/80">
+            <div id="main-view-header" class="sticky top-0 z-20 bg-darkBg/95 backdrop-blur-md p-4 border-b border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div>
+                    <h2 id="current-category-title" class="text-base font-bold text-white flex items-center space-x-2">
+                        <i class="fa-solid fa-fire text-neonPink"></i>
+                        <span>Все треки</span>
+                    </h2>
+                    <p class="text-xs text-gray-400" id="current-category-subtitle">Популярные хиты и новинки</p>
+                </div>
+                <div class="relative w-full sm:w-64">
+                    <i class="fa-solid fa-search absolute left-3 top-2.5 text-xs text-gray-500"></i>
+                    <input type="text" id="searchInput" oninput="searchTracks()" placeholder="Поиск трека..." class="w-full bg-panelBg border border-gray-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-neonCyan transition">
+                </div>
+            </div>
+
+            <div id="center-dynamic-content" class="p-4 space-y-3 flex-1">
+                <!-- Список треков -->
+            </div>
+
+            <div id="pagination-box" class="p-4 border-t border-gray-800/80 flex items-center justify-center space-x-2 shrink-0">
+                <button onclick="changePage(1)" id="page-1-btn" class="w-8 h-8 rounded-lg bg-neonCyan text-gray-950 font-bold text-xs shadow-md">1</button>
+                <button onclick="changePage(2)" id="page-2-btn" class="w-8 h-8 rounded-lg bg-gray-800 text-gray-300 font-bold text-xs">2</button>
+            </div>
+        </section>
+
+        <!-- COLUMN 3: RIGHT PANEL (Player & Comments) -->
+        <aside id="col-player" class="w-full md:w-1/4 bg-panelBg/90 flex flex-col h-full overflow-y-auto shrink-0">
+            <!-- Аудиоплеер -->
+            <div class="p-4 border-b border-gray-800/80">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-compact-disc text-neonCyan"></i>
+                        <span>Аудиоплеер</span>
+                    </span>
+                    <span id="player-status-badge" class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-gray-800 text-gray-400">Стоп</span>
+                </div>
+
+                <div class="bg-black/40 border border-gray-800 rounded-2xl p-4">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="relative w-12 h-12 rounded-xl overflow-hidden shadow-md shrink-0 border border-gray-700">
+                            <img id="player-cover" src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&auto=format&fit=crop&q=80" class="w-full h-full object-cover">
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <h4 id="player-title" class="text-sm font-bold text-white truncate">Выберите трек</h4>
+                            <p id="player-artist" class="text-xs text-gray-400 truncate">NeonBeat Radio</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="range" id="progressBar" value="0" max="100" class="w-full h-1 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-neonCyan">
+                        <div class="flex justify-between text-[10px] text-gray-500 mt-1">
+                            <span id="currentTime">0:00</span>
+                            <span id="totalTime">0:00</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-center space-x-3">
+                        <button onclick="prevTrack()" class="w-9 h-9 rounded-full bg-gray-800 text-gray-300 flex items-center justify-center text-xs"><i class="fa-solid fa-backward-step"></i></button>
+                        <button onclick="togglePlay()" id="playPauseBtn" class="w-11 h-11 rounded-full bg-gradient-to-r from-neonCyan to-neonPink text-gray-950 flex items-center justify-center text-sm font-bold shadow-lg"><i id="playPauseIcon" class="fa-solid fa-play ml-0.5"></i></button>
+                        <button onclick="nextTrack()" class="w-9 h-9 rounded-full bg-gray-800 text-gray-300 flex items-center justify-center text-xs"><i class="fa-solid fa-forward-step"></i></button>
+                        <a id="playerDownloadBtn" href="#" download class="w-9 h-9 rounded-full bg-gray-800 hover:bg-neonPink hover:text-white text-gray-300 flex items-center justify-center text-xs transition" title="Скачать трек">
+                            <i class="fa-solid fa-download"></i>
+                        </a>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-gray-800/60 flex items-center space-x-2">
+                        <i class="fa-solid fa-volume-high text-xs text-gray-400"></i>
+                        <input type="range" id="volumeBar" min="0" max="1" step="0.05" value="0.8" class="w-full h-1 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-neonPink">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Комментарии -->
+            <div class="p-4 flex-1 flex flex-col">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 flex items-center space-x-1.5">
+                    <i class="fa-solid fa-comments text-neonPurple"></i>
+                    <span>Комментарии гостей</span>
+                </h3>
+                <form id="commentForm" onsubmit="addComment(event)" class="space-y-2 mb-4">
+                    <input type="text" id="guestName" placeholder="Ваше имя" required class="w-full bg-black/40 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-neonPurple">
+                    <textarea id="commentText" placeholder="Ваш отзыв..." rows="2" required class="w-full bg-black/40 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-neonPurple resize-none"></textarea>
+                    <button type="submit" class="w-full py-2 bg-gradient-to-r from-neonPurple to-neonPink rounded-xl text-xs font-bold text-white shadow-md">Отправить</button>
+                </form>
+                <div id="commentsList" class="space-y-2.5 overflow-y-auto flex-1 pr-1"></div>
+            </div>
+        </aside>
+
+    </main>
+
+    <!-- FIXED MOBILE MINI PLAYER -->
+    <div id="mobile-sticky-player" class="fixed bottom-0 left-0 right-0 bg-panelBg/95 border-t border-neonCyan/40 p-2.5 px-4 md:hidden hidden items-center justify-between z-50 backdrop-blur-md shadow-[0_-5px_15px_rgba(0,242,254,0.15)]">
+        <div class="flex items-center space-x-3 min-w-0 flex-1 cursor-pointer" onclick="switchTab('player')">
+            <div class="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-neonCyan/50">
+                <img id="m-player-cover" src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&auto=format&fit=crop&q=80" class="w-full h-full object-cover">
+            </div>
+            <div class="min-w-0 flex-1">
+                <h4 id="m-player-title" class="text-xs font-bold text-white truncate">Трек не выбран</h4>
+                <p id="m-player-artist" class="text-[10px] text-gray-400 truncate">NeonBeat</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2 shrink-0 ml-3">
+            <button onclick="togglePlay()" id="m-playPauseBtn" class="w-9 h-9 rounded-full bg-gradient-to-r from-neonCyan to-neonPink text-gray-950 flex items-center justify-center text-xs font-bold shadow-md">
+                <i id="m-playPauseIcon" class="fa-solid fa-play ml-0.5"></i>
+            </button>
+            <a id="m-downloadBtn" href="#" download class="w-9 h-9 rounded-full bg-gray-800 hover:bg-neonPink text-gray-300 hover:text-white flex items-center justify-center text-xs transition">
+                <i class="fa-solid fa-download"></i>
+            </a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
