@@ -74,7 +74,7 @@ body {
 .neon-pulse-border {
     animation: neonPulse 3s infinite ease-in-out;
 }
-@keyframes neonMoveRight {
+@keyframes neonTextMove {
     0% {
         background-position: 0% 50%;
     }
@@ -87,10 +87,17 @@ body {
 }
 
 .animated-neon-logo {
-    /* Делаем большой градиент, который будет двигаться */
     background: linear-gradient(270deg, #00f2fe, #9d4edd, #fe0095, #00f2fe);
     background-size: 300% 300%;
-    animation: neonMoveRight 4s ease infinite;
+    /* Сменили с 4s на 9 секунд для плавной и неторопливой скорости */
+    animation: neonMoveRight 9s ease infinite; 
 }
 
-
+.animated-neon-text {
+    background: linear-gradient(270deg, #00f2fe, #ffffff, #fe0095, #00f2fe);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    /* Тоже ставим 9 секунд */
+    animation: neonTextMove 9s ease infinite;
+}
