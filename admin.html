@@ -22,10 +22,9 @@
         }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Подключение стилей админки -->
     <link rel="stylesheet" href="css/admin.css">
 </head>
-<body class="min-h-screen flex flex-col selection:bg-neonPink selection:text-white">
+<body class="min-h-screen flex flex-col selection:bg-neonPink selection:text-white bg-darkBg text-white">
 
     <!-- ЭКРАН АВТОРИЗАЦИИ -->
     <div id="login-screen" class="flex-1 flex items-center justify-center p-4">
@@ -41,23 +40,23 @@
             </div>
 
             <form onsubmit="handleLogin(event)" class="space-y-4" autocomplete="off">
-    <div>
-        <label class="block text-xs text-gray-400 mb-1">Логин</label>
-        <input type="text" id="adminLoginInput" required autocomplete="off" placeholder="admin" class="w-full bg-black/50 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neonCyan">
-    </div>
-    <div>
-        <label class="block text-xs text-gray-400 mb-1">Пароль</label>
-        <input type="password" id="adminPassInput" required autocomplete="new-password" placeholder="••••••••" class="w-full bg-black/50 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neonPink">
-    </div>
-    <div>
-        <label class="block text-xs text-gray-400 mb-1">GitHub Personal Access Token</label>
-        <input type="password" id="adminTokenInput" required autocomplete="new-password" placeholder="ghp_..." class="w-full bg-black/50 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neonPink">
-    </div>
-    <p id="login-error" class="text-xs text-red-400 hidden">Неверный логин или пароль!</p>
-    <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-neonCyan to-neonPink text-gray-950 font-bold rounded-xl text-xs shadow-lg hover:opacity-95 transition">
-        Войти в панель
-    </button>
-</form>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Логин</label>
+                    <input type="text" id="adminLoginInput" required autocomplete="off" placeholder="admin" class="w-full bg-black/50 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neonCyan">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Пароль</label>
+                    <input type="password" id="adminPassInput" required autocomplete="new-password" placeholder="••••••••" class="w-full bg-black/50 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neonPink">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">GitHub Personal Access Token</label>
+                    <input type="password" id="adminTokenInput" required autocomplete="new-password" placeholder="ghp_..." class="w-full bg-black/50 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neonPink">
+                </div>
+                <p id="login-error" class="text-xs text-red-400 hidden">Неверный логин, пароль или пустой токен!</p>
+                <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-neonCyan to-neonPink text-gray-950 font-bold rounded-xl text-xs shadow-lg hover:opacity-95 transition">
+                    Войти в панель
+                </button>
+            </form>
         </div>
     </div>
 
@@ -87,19 +86,6 @@
         </header>
 
         <main class="max-w-5xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <section class="bg-panelBg border border-neonPurple/40 rounded-2xl p-5 shadow-[0_0_20px_rgba(157,78,221,0.1)]">
-    <h2 class="text-sm font-bold text-white mb-4 flex items-center justify-between">
-        <span class="flex items-center space-x-2">
-            <i class="fa-solid fa-user-clock text-neonPurple"></i>
-            <span>Заявки от гостей на модерацию</span>
-        </span>
-        <span id="pending-count" class="text-xs text-neonPurple font-mono">0 шт.</span>
-    </h2>
-    <div id="admin-pending-list" class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
-        <!-- Сюда падают заявки -->
-    </div>
-</section>
-            
             <!-- Блок 1: Добавление нового трека -->
             <section class="bg-panelBg border border-neonPink/40 rounded-2xl p-5 shadow-[0_0_20px_rgba(254,0,149,0.1)] h-fit">
                 <h2 class="text-sm font-bold text-white mb-4 flex items-center space-x-2">
@@ -135,8 +121,8 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">Аудиофайл (MP3) или ссылка</label>
-                        <input type="file" id="audioFile" accept="audio/mp3,audio/*" class="w-full bg-black/50 border border-gray-700 rounded-xl px-3 py-1.5 text-xs text-gray-300 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-neonPink file:text-white hover:file:opacity-90">
+                        <label class="block text-xs text-gray-400 mb-1">Аудиофайл (MP3)</label>
+                        <input type="file" id="audioFile" accept="audio/mp3,audio/*" required class="w-full bg-black/50 border border-gray-700 rounded-xl px-3 py-1.5 text-xs text-gray-300 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-neonPink file:text-white hover:file:opacity-90">
                     </div>
                     <div>
                         <label class="block text-xs text-gray-400 mb-1">Обложка трека (Картинка)</label>
@@ -176,11 +162,9 @@
                     </div>
                 </section>
             </div>
-
         </main>
     </div>
 
-    <!-- Подключение скрипта админки -->
     <script src="js/admin.js"></script>
 </body>
 </html>
