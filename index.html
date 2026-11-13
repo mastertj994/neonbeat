@@ -25,6 +25,21 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="h-screen overflow-hidden flex flex-col justify-between selection:bg-neonPink selection:text-white">
+<!-- ЭКРАН ЗАСТАВКИ (АВТОМАТИЧЕСКИЙ) -->
+<div class="fixed inset-0 z-50 bg-[#0b0f19] flex flex-col items-center justify-center animate-[fadeOut_0.8s_ease_1.5s_forwards] pointer-events-none">
+    <div class="flex flex-col items-center space-y-4">
+        <!-- Иконка с анимированным градиентом -->
+        <div class="w-16 h-16 rounded-2xl animated-neon-logo flex items-center justify-center shadow-[0_0_25px_rgba(0,242,254,0.6)]">
+            <i class="fa-solid fa-headphones-simple text-gray-950 font-bold text-2xl"></i>
+        </div>
+        <!-- Текст -->
+        <div class="text-center">
+            <span class="text-xl md:text-2xl font-bold tracking-wider animated-neon-text block leading-none">NEONBEAT</span>
+            <span class="text-xs tracking-widest animated-neon-text font-mono uppercase mt-1 block">by MasterTJK</span>
+        </div>
+    </div>
+</div>
+
 
     <!-- TOP HEADER & AD BANNER -->
     <header class="w-full bg-gradient-to-r from-panelBg via-gray-900 to-panelBg border-b border-gray-800 py-2.5 px-3 shrink-0 shadow-lg relative overflow-hidden z-30">
