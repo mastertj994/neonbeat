@@ -363,15 +363,22 @@ function escapeHtml(str) {
 setInterval(() => {
     loadComments();
 }, 3000);
-window.addEventListener('load', () => {
+function hideSplash() {
     const splash = document.getElementById('splash-screen');
     if (splash) {
-        // Небольшая задержка (например, 1.2 секунды), чтобы пользователь успел насладиться заставкой
+        splash.style.opacity = '0';
         setTimeout(() => {
-            splash.style.opacity = '0'; // Делаем прозрачной
-            setTimeout(() => {
-                splash.style.display = 'none'; // Полностью убираем из потока страницы
-            }, 700); // Время совпадает с duration-700 в Tailwind
-        }, 1200);
+            splash.style.display = 'none';
+        }, 700);
     }
-});
+}
+
+// Проверяем, загрузилась ли страница, или скрываем сразу
+if (document.readyState === 'complete') {
+    hideSplash();
+} else {
+    window.addEventListener('load', hideSplash);
+}
+
+// Страховка: если через 3 секунды заставка всё еще висит — принудительно гасим её
+setTimeout(hideSplash, 3000);
