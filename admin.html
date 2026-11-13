@@ -40,18 +40,18 @@
                 </div>
             </div>
 
-            <form onsubmit="handleLogin(event)" class="space-y-4">
+            <form onsubmit="handleLogin(event)" class="space-y-4" autocomplete="off">
     <div>
         <label class="block text-xs text-gray-400 mb-1">Логин</label>
-        <input type="text" id="adminLoginInput" required placeholder="admin" class="w-full bg-black/50 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neonCyan">
+        <input type="text" id="adminLoginInput" required autocomplete="off" placeholder="admin" class="w-full bg-black/50 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neonCyan">
     </div>
     <div>
         <label class="block text-xs text-gray-400 mb-1">Пароль</label>
-        <input type="password" id="adminPassInput" required placeholder="••••••••" class="w-full bg-black/50 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neonPink">
+        <input type="password" id="adminPassInput" required autocomplete="new-password" placeholder="••••••••" class="w-full bg-black/50 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neonPink">
     </div>
     <div>
         <label class="block text-xs text-gray-400 mb-1">GitHub Personal Access Token</label>
-        <input type="password" id="adminTokenInput" required placeholder="ghp_..." class="w-full bg-black/50 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neonPink">
+        <input type="password" id="adminTokenInput" required autocomplete="new-password" placeholder="ghp_..." class="w-full bg-black/50 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neonPink">
     </div>
     <p id="login-error" class="text-xs text-red-400 hidden">Неверный логин или пароль!</p>
     <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-neonCyan to-neonPink text-gray-950 font-bold rounded-xl text-xs shadow-lg hover:opacity-95 transition">
