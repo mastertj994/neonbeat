@@ -170,9 +170,10 @@
         </section>
 
         <!-- COLUMN 3: RIGHT PANEL (Player & Comments) -->
-        <aside id="col-player" class="w-full md:w-1/4 bg-panelBg/90 flex flex-col h-full overflow-y-auto shrink-0">
-            <!-- Аудиоплеер -->
-            <div class="p-4 border-b border-gray-800/80">
+       <!-- COLUMN 3: RIGHT PANEL (Player & Comments) -->
+        <aside id="col-player" class="w-full md:w-1/4 bg-panelBg/90 flex flex-col h-full shrink-0 overflow-hidden">
+            <!-- Аудиоплеер (Всегда закреплен наверху колонки) -->
+            <div class="p-4 border-b border-gray-800/80 shrink-0">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center space-x-1.5">
                         <i class="fa-solid fa-compact-disc text-neonCyan"></i>
@@ -216,17 +217,18 @@
                 </div>
             </div>
 
-            <!-- Комментарии -->
-            <div class="p-4 flex-1 flex flex-col">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 flex items-center space-x-1.5">
+            <!-- Блок комментариев (Форма стоит на месте, скроллится только список) -->
+            <div class="p-4 flex-1 flex flex-col min-h-0">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 flex items-center space-x-1.5 shrink-0">
                     <i class="fa-solid fa-comments text-neonPurple"></i>
                     <span>Комментарии гостей</span>
                 </h3>
-                <form id="commentForm" onsubmit="addComment(event)" class="space-y-2 mb-4">
+                <form id="commentForm" onsubmit="addComment(event)" class="space-y-2 mb-3 shrink-0">
                     <input type="text" id="guestName" placeholder="Ваше имя" required class="w-full bg-black/40 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-neonPurple">
                     <textarea id="commentText" placeholder="Ваш отзыв..." rows="2" required class="w-full bg-black/40 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-neonPurple resize-none"></textarea>
                     <button type="submit" class="w-full py-2 bg-gradient-to-r from-neonPurple to-neonPink rounded-xl text-xs font-bold text-white shadow-md">Отправить</button>
                 </form>
+                <!-- Скроллиться будет только эта часть -->
                 <div id="commentsList" class="space-y-2.5 overflow-y-auto flex-1 pr-1"></div>
             </div>
         </aside>
