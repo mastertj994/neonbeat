@@ -101,11 +101,13 @@ function switchTab(tabName) {
 }
 
 function toggleCountry(country) {
-    const sub = document.getElementById(`sub-${country}`); const icon = document.getElementById(`icon-${country}`);
+    const sub = document.getElementById(`sub-${country}`);
+    const icon = document.getElementById(`icon-${country}`);
     
     ['russia', 'uzbekistan', 'tajikistan'].forEach(c => {
         if (c !== country) {
-            const subEl = document.getElementById(`sub-${c}`); const iconEl = document.getElementById(`icon-${c}`);
+            const subEl = document.getElementById(`sub-${c}`);
+            const iconEl = document.getElementById(`icon-${c}`);
             if (subEl) subEl.classList.add('hidden');
             if (iconEl) iconEl.style.transform = 'rotate(0deg)';
         }
@@ -184,4 +186,160 @@ function renderTracks() {
                 <button onclick="playTrack(${tracks.indexOf(track)})" class="w-8 h-8 rounded-lg bg-gray-800 hover:bg-neonCyan hover:text-gray-950 text-gray-300 flex items-center justify-center text-xs transition">
                     <i class="fa-solid fa-play"></i>
                 </button>
-                <a href="${track.audio}" download class="w-8 h-8 rounded-lg bg-gray-800 hover:bg-neonPink hover:text-white text-gray-300 flex items-center justify-center text-xs transition
+                <a href="${track.audio}" download class="w-8 h-8 rounded-lg bg-gray-800 hover:bg-neonPink hover:text-white text-gray-300 flex items-center justify-center text-xs transition">
+                    <i class="fa-solid fa-download"></i>
+                </a>
+            </div>
+        </div>
+    `).join('');
+}
+
+function playTrack(index) {
+    if (!tracks[index]) return;
+    currentTrackIndex = index;
+    const track = tracks[currentTrackIndex];
+    audioElement.src = track.audio;
+    audioElement.play();
+    isPlaying = true;
+
+    const setText = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+    const setSrc = (id, val) => { const el = document.getElementById(id); if (el) el.src = val; };
+    const setHref = (id, val) => { const el = document.getElementById(id); if (el) el.href = val; };
+
+    setText('player-title', track.title);
+    setText('player-artist', track.artist);
+    setSrc('player-cover', track.cover);
+    setHref('playerDownloadBtn', track.audio);
+    setText('player-status-badge', "ИГРАЕТ");
+    
+    const playIcon = document.getElementById('playPauseIcon');
+    if (playIcon) playIcon.className = "fa-solid fa-pause";
+    
+    const playerCol = document.getElementById('col-player');
+    if (playerCol) playerCol.classList.add('pulsing-led', 'neon-border-cyan');
+
+    setText('m-player-title', track.title);
+    setText('m-player-artist', track.artist);
+    setSrc('m-player-cover', track.cover);
+    setHref('m-downloadBtn', track.audio);
+    
+    const mPlayIcon = document.getElementById('m-playPauseIcon');
+    if (mPlayIcon) mPlayIcon.className = "fa-solid fa-pause";
+    
+    if (window.innerWidth < 768) {
+        const stickyPlayer = document.getElementById('mobile-sticky-player');
+        if (stickyPlayer) stickyPlayer.style.display = 'flex';
+    }
+}
+
+function togglePlay() {
+    if (!audioElement.src) {
+        playTrack(0);
+        return;
+    }
+    const playIcon = document.getElementById('playPauseIcon');
+    const mPlayIcon = document.getElementById('m-playPauseIcon');
+    const playerCol = document.getElementById('col-player');
+
+    if (isPlaying) {
+        audioElement.pause();
+        isPlaying = false;
+        if (playIcon) playIcon.className = "fa-solid fa-play ml-0.5";
+        if (mPlayIcon) mPlayIcon.className = "fa-solid fa-play ml-0.5";
+        const statusBadge = document.getElementById('player-status-badge');
+        if (statusBadge) statusBadge.innerText = "ПАУЗА";
+        if (playerCol) playerCol.classList.remove('pulsing-led');
+    } else {
+        audioElement.play();
+        isPlaying = true;
+        if (playIcon) playIcon.className = "fa-solid fa-pause";
+        if (mPlayIcon) mPlayIcon.className = "fa-solid fa-pause";
+        const statusBadge = document.getElementById('player-status-badge');
+        if (statusBadge) statusBadge.innerText = "ИГРАЕТ";
+        if (playerCol) playerCol.classList.add('pulsing-led');
+    }
+}
+
+function nextTrack() {
+    if (tracks.length === 0) return;
+    currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+    playTrack(currentTrackIndex);
+}
+
+function prevTrack() {
+    if (tracks.length === 0) return;
+    currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
+    playTrack(currentTrackIndex);
+}
+
+function updateProgress() {
+    if (audioElement.duration) {
+        const progressBar = document.getElementById('progressBar');
+        if (progressBar) progressBar.value = (audioElement.currentTime / audioElement.duration) * 100;
+
+        const curTimeEl = document.getElementById('currentTime');
+        if (curTimeEl) curTimeEl.innerText = formatTime(audioElement.currentTime);
+
+        const totTimeEl = document.getElementById('totalTime');
+        if (totTimeEl) totTimeEl.innerText = formatTime(audioElement.duration);
+    }
+}
+
+function formatTime(s) {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+}
+
+async function loadComments() {
+    const commentsList = document.getElementById('commentsList');
+    if (!commentsList) return;
+
+    try {
+        let localComments = JSON.parse(localStorage.getItem('neonbeat_comments')) || [];
+        const response = await fetch(`https://raw.githubusercontent.com/mastertj994/neonbeat/main/comments.json?t=${Date.now()}`);
+        let githubComments = response.ok ? await response.json() : [];
+
+        let allComments = [...localComments, ...githubComments];
+        let uniqueComments = Array.from(new Set(allComments.map(c => c.text + c.name)))
+            .map(key => allComments.find(c => (c.text + c.name) === key));
+
+        if (uniqueComments.length === 0) {
+            commentsList.innerHTML = `<p class="text-gray-500 text-xs text-center py-2">Пока нет комментариев. Оставь первый!</p>`;
+            return;
+        }
+
+        commentsList.innerHTML = uniqueComments.map(c => `
+            <div class="bg-black/30 border border-gray-800 rounded-xl p-2 text-xs">
+                <span class="font-bold text-neonPurple">${escapeHtml(c.name)}</span>: <span class="text-gray-300">${escapeHtml(c.text)}</span>
+            </div>
+        `).join('');
+    } catch (e) {
+        console.error("Ошибка загрузки комментариев:", e);
+    }
+}
+
+function addComment(e) {
+    e.preventDefault();
+    const guestNameInput = document.getElementById('guestName');
+    const commentTextInput = document.getElementById('commentText');
+    if (!guestNameInput || !commentTextInput) return;
+
+    const name = guestNameInput.value.trim();
+    const text = commentTextInput.value.trim();
+    if (!name || !text) return;
+
+    let localComments = JSON.parse(localStorage.getItem('neonbeat_comments')) || [];
+    localComments.unshift({ name, text, time: "Только что" });
+    localStorage.setItem('neonbeat_comments', JSON.stringify(localComments));
+
+    guestNameInput.value = '';
+    commentTextInput.value = '';
+    loadComments();
+}
+
+function escapeHtml(str) {
+    return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+    );
+}
