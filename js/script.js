@@ -18,7 +18,30 @@ window.addEventListener('DOMContentLoaded', async () => {
     initScreenLayout();
     renderTracks();
     loadComments();
+// 🔄 ВОТ ЗДЕСЬ ДОБАВЬ ЭТИ СТРОКИ:
+    setInterval(() => {
+        loadComments();
+    }, 3000);
 
+    audioElement.addEventListener('timeupdate', updateProgress);
+    audioElement.addEventListener('ended', nextTrack);
+
+    const progressBar = document.getElementById('progressBar');
+    if (progressBar) {
+        progressBar.addEventListener('input', (e) => {
+            if (audioElement.duration) {
+                audioElement.currentTime = (e.target.value / 100) * audioElement.duration;
+            }
+        });
+    }
+
+    const volumeBar = document.getElementById('volumeBar');
+    if (volumeBar) {
+        volumeBar.addEventListener('input', (e) => {
+            audioElement.volume = e.target.value;
+        });
+    }
+});
     audioElement.addEventListener('timeupdate', updateProgress);
     audioElement.addEventListener('ended', nextTrack);
 
