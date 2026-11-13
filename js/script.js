@@ -1,12 +1,47 @@
-const defaultTracks = [
-    { id: 1, title: "Pamir Breeze", artist: "Tajik Beats", country: "Таджикистан", genre: "Поп", duration: "3:45", cover: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&auto=format&fit=crop&q=80", audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-    { id: 2, title: "Tashkent Nights", artist: "DJ Shod", country: "Узбекистан", genre: "Хип-хоп", duration: "2:50", cover: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=150&auto=format&fit=crop&q=80", audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
-    { id: 3, title: "Cyber City Lights", artist: "Neon Pulse", country: "Россия", genre: "Электроника", duration: "4:10", cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150&auto=format&fit=crop&q=80", audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" }
-];
+const let tracks = [];
+let currentFilterCountry = 'Все';
+let currentFilterGenre = 'Все Жанры';
+let searchQuery = '';
+let currentTrackIndex = 0;
+let isPlaying = false;
 
-let tracks = JSON.parse(localStorage.getItem('neonbeat_tracks')) || defaultTracks;
-if (!localStorage.getItem('neonbeat_tracks')) {
-    localStorage.setItem('neonbeat_tracks', JSON.stringify(tracks));
+const audioElement = new Audio();
+
+window.addEventListener('DOMContentLoaded', async () => {
+    // Загружаем актуальный плейлист с GitHub с защитой от кэша
+    await loadTracksFromGitHub();
+
+    initScreenLayout();
+    renderTracks();
+    loadComments();
+
+    audioElement.addEventListener('timeupdate', updateProgress);
+    audioElement.addEventListener('ended', nextTrack);
+
+    document.getElementById('progressBar').addEventListener('input', (e) => {
+        if (audioElement.duration) {
+            audioElement.currentTime = (e.target.value / 100) * audioElement.duration;
+        }
+    });
+    document.getElementById('volumeBar').addEventListener('input', (e) => {
+        audioElement.volume = e.target.value;
+    });
+});
+
+async function loadTracksFromGitHub() {
+    try {
+        const response = await fetch(`https://raw.githubusercontent.com/mastertj994/neonbeat/main/tracks.json?t=${Date.now()}`);
+        if (response.ok) {
+            tracks = await response.json();
+        } else {
+            throw new Error("Не удалось загрузить tracks.json");
+        }
+    } catch (e) {
+        console.error("Ошибка загрузки плейлиста, используем дефолтные:", e);
+        tracks = [
+            { id: 1, title: "Pamir Breeze", artist: "Tajik Beats", country: "Таджикистан", genre: "Поп", duration: "3:45", cover: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&auto=format&fit=crop&q=80", audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" }
+        ];
+    }
 }
 
 let currentFilterCountry = 'Все';
