@@ -14,9 +14,7 @@ let isPlaying = false;
 const audioElement = new Audio();
 
 window.addEventListener('DOMContentLoaded', async () => {
-    // Сначала пробуем загрузить треки с GitHub, если не получилось — берем дефолтные
     await loadTracksFromGitHub();
-
     initScreenLayout();
     renderTracks();
     loadComments();
@@ -168,4 +166,158 @@ function renderTracks() {
         return matchCountry && matchGenre && matchSearch;
     });
 
-    if (filtered.length ===
+    if (filtered.length === 0) {
+        container.innerHTML = `<div class="text-center py-12 text-gray-500 text-xs"><p>Треки не найдены</p></div>`;
+        return;
+    }
+
+    container.innerHTML = filtered.map((track) => `
+        <div class="bg-panelBg/60 border border-gray-800/80 hover:border-neonCyan/40 rounded-2xl p-3 flex items-center justify-between transition group">
+            <div class="flex items-center space-x-3 min-w-0">
+                <div class="relative w-11 h-11 rounded-xl overflow-hidden shrink-0">
+                    <img src="${track.cover}" class="w-full h-full object-cover">
+                </div>
+                <div class="min-w-0">
+                    <h4 class="text-xs font-bold text-white truncate">${track.title}</h4>
+                    <p class="text-[11px] text-gray-400 truncate">${track.artist} &bull; <span class="text-neonPink">${track.country}</span></p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 shrink-0">
+                <button onclick="playTrack(${tracks.indexOf(track)})" class="w-8 h-8 rounded-lg bg-gray-800 hover:bg-neonCyan hover:text-gray-950 text-gray-300 flex items-center justify-center text-xs transition">
+                    <i class="fa-solid fa-play"></i>
+                </button>
+                <a href="${track.audio}" download class="w-8 h-8 rounded-lg bg-gray-800 hover:bg-neonPink hover:text-white text-gray-300 flex items-center justify-center text-xs transition">
+                    <i class="fa-solid fa-download"></i>
+                </a>
+            </div>
+        </div>
+    `).join('');
+}
+
+function playTrack(index) {
+    if (!tracks[index]) return;
+    currentTrackIndex = index;
+    const track = tracks[currentTrackIndex];
+    audioElement.src = track.audio;
+    audioElement.play();
+    isPlaying = true;
+
+    const setText = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+    const setSrc = (id, val) => { const el = document.getElementById(id); if (el) el.src = val; };
+    const setHref = (id, val) => { const el = document.getElementById(id); if (el) el.href = val; };
+
+    setText('player-title', track.title);
+    setText('player-artist', track.artist);
+    setSrc('player-cover', track.cover);
+    setHref('playerDownloadBtn', track.audio);
+    setText('player-status-badge', "ИГРАЕТ");
+    
+    const playIcon = document.getElementById('playPauseIcon');
+    if (playIcon) playIcon.className = "fa-solid fa-pause";
+    
+    const playerCol = document.getElementById('col-player');
+    if (playerCol) playerCol.classList.add('pulsing-led', 'neon-border-cyan');
+
+    setText('m-player-title', track.title);
+    setText('m-player-artist', track.artist);
+    setSrc('m-player-cover', track.cover);
+    setHref('m-downloadBtn', track.audio);
+    
+    const mPlayIcon = document.getElementById('m-playPauseIcon');
+    if (mPlayIcon) mPlayIcon.className = "fa-solid fa-pause";
+    
+    if (window.innerWidth < 768) {
+        const stickyPlayer = document.getElementById('mobile-sticky-player');
+        if (stickyPlayer) stickyPlayer.style.display = 'flex';
+    }
+}
+
+function togglePlay() {
+    if (!audioElement.src) {
+        playTrack(0);
+        return;
+    }
+    const playIcon = document.getElementById('playPauseIcon');
+    const mPlayIcon = document.getElementById('m-playPauseIcon');
+    const playerCol = document.getElementById('col-player');
+
+    if (isPlaying) {
+        audioElement.pause();
+        isPlaying = false;
+        if (playIcon) playIcon.className = "fa-solid fa-play ml-0.5";
+        if (mPlayIcon) mPlayIcon.className = "fa-solid fa-play ml-0.5";
+        const statusBadge = document.getElementById('player-status-badge');
+        if (statusBadge) statusBadge.innerText = "ПАУЗА";
+        if (playerCol) playerCol.classList.remove('pulsing-led');
+    } else {
+        audioElement.play();
+        isPlaying = true;
+        if (playIcon) playIcon.className = "fa-solid fa-pause";
+        if (mPlayIcon) mPlayIcon.className = "fa-solid fa-pause";
+        const statusBadge = document.getElementById('player-status-badge');
+        if (statusBadge) statusBadge.innerText = "ИГРАЕТ";
+        if (playerCol) playerCol.classList.add('pulsing-led');
+    }
+}
+
+function nextTrack() {
+    if (tracks.length === 0) return;
+    currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+    playTrack(currentTrackIndex);
+}
+
+function prevTrack() {
+    if (tracks.length === 0) return;
+    currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
+    playTrack(currentTrackIndex);
+}
+
+function updateProgress() {
+    if (audioElement.duration) {
+        const progressBar = document.getElementById('progressBar');
+        if (progressBar) progressBar.value = (audioElement.currentTime / audioElement.duration) * 100;
+
+        const curTimeEl = document.getElementById('currentTime');
+        if (curTimeEl) curTimeEl.innerText = formatTime(audioElement.currentTime);
+
+        const totTimeEl = document.getElementById('totalTime');
+        if (totTimeEl) totTimeEl.innerText = formatTime(audioElement.duration);
+    }
+}
+
+function formatTime(s) {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+}
+
+let comments = JSON.parse(localStorage.getItem('neonbeat_comments')) || [
+    { name: "Тимур", text: "Отличный сайт!", time: "Только что" }
+];
+
+function loadComments() {
+    const commentsList = document.getElementById('commentsList');
+    if (!commentsList) return;
+    commentsList.innerHTML = comments.map(c => `
+        <div class="bg-black/30 border border-gray-800 rounded-xl p-2 text-xs">
+            <span class="font-bold text-neonPurple">${c.name}</span>: <span class="text-gray-300">${c.text}</span>
+        </div>
+    `).join('');
+}
+
+function addComment(e) {
+    e.preventDefault();
+    const guestNameInput = document.getElementById('guestName');
+    const commentTextInput = document.getElementById('commentText');
+    if (!guestNameInput || !commentTextInput) return;
+
+    const n = guestNameInput.value.trim();
+    const t = commentTextInput.value.trim();
+    if (n && t) {
+        comments.unshift({ name: n, text: t, time: "Только что" });
+        localStorage.setItem('neonbeat_comments', JSON.stringify(comments));
+        guestNameInput.value = '';
+        commentTextInput.value = '';
+        loadComments();
+    }
+}
