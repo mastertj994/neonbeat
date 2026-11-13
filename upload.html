@@ -53,4 +53,18 @@
                 <input type="text" id="guestGenre" required placeholder="Поп / Рэп / Инди" class="w-full bg-black/50 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neonCyan">
             </div>
             <div>
-                <label class="block text-[11px] text-gray-400 mb-1">А
+                <label class="block text-[11px] text-gray-400 mb-1">Аудиофайл (MP3 с компьютера)</label>
+                <input type="file" id="guestAudio" accept="audio/*" required class="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-neonCyan/20 file:text-neonCyan hover:file:bg-neonCyan/30">
+            </div>
+            <div>
+                <label class="block text-[11px] text-gray-400 mb-1">Обложка / Картинка альбома</label>
+                <input type="file" id="guestCover" accept="image/*" class="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-neonPink/20 file:text-neonPink hover:file:bg-neonPink/30">
+            </div>
+            <button type="submit" class="w-full py-3 bg-gradient-to-r from-neonCyan to-neonPink text-gray-950 font-bold rounded-xl text-xs shadow-lg mt-3 hover:opacity-95 transition">
+                Отправить администратору
+            </button>
+        </form>
+    </div>
+
+</body>
+</html>
