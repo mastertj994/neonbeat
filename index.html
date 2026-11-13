@@ -25,6 +25,25 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="h-screen overflow-hidden flex flex-col justify-between selection:bg-neonPink selection:text-white">
+<!-- ЭКРАН ЗАСТАВКИ (SPLASH SCREEN) -->
+<div id="splash-screen" class="fixed inset-0 z-50 bg-[#0b0f19] flex flex-col items-center justify-center transition-opacity duration-700">
+    <div class="flex flex-col items-center space-y-4">
+        <!-- Твой анимированный логотип (иконка) -->
+        <div class="w-16 h-16 rounded-2xl animated-neon-logo flex items-center justify-center shadow-[0_0_25px_rgba(0,242,254,0.6)] animate-pulse">
+            <i class="fa-solid fa-headphones-simple text-gray-950 font-bold text-2xl"></i>
+        </div>
+        <!-- Текст логотипа -->
+        <div class="text-center">
+            <span class="text-xl md:text-2xl font-bold tracking-wider animated-neon-text block leading-none">NEONBEAT</span>
+            <span class="text-xs tracking-widest animated-neon-text font-mono uppercase mt-1 block">by MasterTJK</span>
+        </div>
+        <!-- Индикатор загрузки (опционально, точечки или полоска) -->
+        <div class="w-24 h-1 bg-gray-800 rounded-full overflow-hidden mt-2">
+            <div class="bg-gradient-to-r from-neonCyan to-neonPink h-full w-full animate-[shimmer_1.5s_infinite]"></div>
+        </div>
+    </div>
+</div>
+
 
     <!-- TOP HEADER & AD BANNER -->
     <header class="w-full bg-gradient-to-r from-panelBg via-gray-900 to-panelBg border-b border-gray-800 py-2.5 px-3 shrink-0 shadow-lg relative overflow-hidden z-30">
