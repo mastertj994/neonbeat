@@ -106,7 +106,6 @@ function toggleAdminPlay(audioUrl, idx) {
     const miniPlayer = document.getElementById(`admin-mini-player-${idx}`);
     const playIcon = document.getElementById(`admin-play-icon-${idx}`);
 
-    // Если уже играет другой трек — остановим его
     if (currentAdminAudio && currentAdminAudio !== audioElement) {
         currentAdminAudio.pause();
         if (currentAdminIdx !== null) {
@@ -160,12 +159,12 @@ function stopAdminPlay(idx) {
     currentAdminIdx = null;
 }
 
-// Вспомогательная функция форматирования времени (если её еще нет в файле)
 function formatTime(s) {
     const m = Math.floor(s / 60);
     const sec = Math.floor(s % 60);
     return `${m}:${sec < 10 ? '0' : ''}${sec}`;
 }
+
 function fileToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -175,29 +174,79 @@ function fileToBase64(file) {
     });
 }
 
-async function uploadFileToGitHub(path, base64Content) {
-    const token = localStorage.getItem('neonbeat_gh_token');
-    const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${path}`;
-    
-    let sha = null;
-    const checkRes = await fetch(url, { headers: { Authorization: `token ${token}` } });
-    if (checkRes.ok) {
-        const fileData = await checkRes.json();
-        sha = fileData.sha;
-    }
+// УЛУЧШЕННАЯ ФУНКЦИЯ ЗАГРУЗКИ С ПРОЦЕНТАМИ (Х)
+function uploadFileToGitHubWithProgress(path, base64Content, statusMessage = "Отправка файла...") {
+    return new Promise(async (resolve, reject) => {
+        const token = localStorage.getItem('neonbeat_gh_token');
+        const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${path}`;
+        
+        // Элементы прогресс-бара в HTML
+        const progressBox = document.getElementById('uploadProgressBox');
+        const progressBar = document.getElementById('uploadProgressBar');
+        const percentText = document.getElementById('uploadPercentText');
+        const statusText = document.getElementById('uploadStatusText');
 
-    const bodyData = { message: `Upload ${path}`, content: base64Content };
-    if (sha) bodyData.sha = sha;
+        if (progressBox) progressBox.classList.remove('hidden');
+        if (statusText) statusText.textContent = "Проверка файла на сервере...";
 
-    const response = await fetch(url, {
-        method: 'PUT',
-        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(bodyData)
+        // Узнаем SHA файла, если он уже существовал
+        let sha = null;
+        try {
+            const checkRes = await fetch(url, { headers: { Authorization: `token ${token}` } });
+            if (checkRes.ok) {
+                const fileData = await checkRes.json();
+                sha = fileData.sha;
+            }
+        } catch (e) {}
+
+        if (statusText) statusText.textContent = statusMessage;
+
+        const bodyData = { message: `Upload ${path}`, content: base64Content };
+        if (sha) bodyData.sha = sha;
+
+        // Используем XMLHttpRequest для отслеживания реального прогресса передачи
+        const xhr = new XMLHttpRequest();
+
+        xhr.upload.onprogress = function(event) {
+            if (event.lengthComputable) {
+                const percent = Math.round((event.loaded / event.total) * 100);
+                if (progressBar) progressBar.style.width = percent + '%';
+                if (percentText) percentText.textContent = percent + '%';
+                
+                if (percent === 100 && statusText) {
+                    statusText.textContent = "GitHub сохраняет файл...";
+                }
+            }
+        };
+
+        xhr.onload = function() {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                if (statusText) statusText.textContent = "Готово!";
+                setTimeout(() => {
+                    if (progressBox) progressBox.classList.add('hidden');
+                }, 1500);
+                try {
+                    const resData = JSON.parse(xhr.responseText);
+                    resolve(resData.content.download_url);
+                } catch (e) {
+                    resolve(null);
+                }
+            } else {
+                if (statusText) statusText.textContent = "Ошибка загрузки!";
+                reject(new Error(`Ошибка GitHub: ${xhr.status} ${xhr.statusText}`));
+            }
+        };
+
+        xhr.onerror = function() {
+            if (statusText) statusText.textContent = "Сбой сети!";
+            reject(new Error("Ошибка соединения с интернетом"));
+        };
+
+        xhr.open("PUT", url, true);
+        xhr.setRequestHeader("Authorization", `token ${token}`);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(JSON.stringify(bodyData));
     });
-
-    if (!response.ok) throw new Error("Ошибка загрузки файла на GitHub");
-    const resData = await response.json();
-    return resData.content.download_url;
 }
 
 async function deleteFileFromGitHub(fileUrl) {
@@ -259,27 +308,43 @@ async function addNewTrack(event) {
     const genre = document.getElementById('newGenre').value;
     const audioInput = document.getElementById('audioFile');
     const coverInput = document.getElementById('coverFile');
+    const submitBtn = event.target.querySelector('button[type="submit"]');
 
     if (!audioInput.files[0]) { alert("Выберите аудио!"); return; }
 
     try {
-        alert("Загрузка...");
-        const audioBase64 = await fileToBase64(audioInput.files[0]);
-        const audioUrl = await uploadFileToGitHub(`music/${Date.now()}_${audioInput.files[0].name}`, audioBase64);
+        if (submitBtn) submitBtn.disabled = true;
 
+        // 1. Загрузка MP3 файла с отслеживанием прогресса
+        const audioBase64 = await fileToBase64(audioInput.files[0]);
+        const audioUrl = await uploadFileToGitHubWithProgress(
+            `music/${Date.now()}_${audioInput.files[0].name}`, 
+            audioBase64, 
+            "Загрузка аудиофайла..."
+        );
+
+        // 2. Загрузка обложки (если выбрана)
         let coverUrl = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&auto=format&fit=crop&q=80";
         if (coverInput.files && coverInput.files[0]) {
             const coverBase64 = await fileToBase64(coverInput.files[0]);
-            coverUrl = await uploadFileToGitHub(`covers/${Date.now()}_${coverInput.files[0].name}`, coverBase64);
+            coverUrl = await uploadFileToGitHubWithProgress(
+                `covers/${Date.now()}_${coverInput.files[0].name}`, 
+                coverBase64, 
+                "Загрузка обложки..."
+            );
         }
 
+        // 3. Сохранение обновленного списка в tracks.json
         tracks.unshift({ id: Date.now(), title, artist, country, genre, duration: "3:15", cover: coverUrl, audio: audioUrl });
         await updateJsonFileOnGitHub('tracks.json', tracks);
+        
         event.target.reset();
         renderAdminTracks();
         alert("Трек успешно опубликован!");
     } catch (e) {
         alert("Ошибка: " + e.message);
+    } finally {
+        if (submitBtn) submitBtn.disabled = false;
     }
 }
 
