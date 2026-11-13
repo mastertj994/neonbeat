@@ -2,7 +2,6 @@ const GITHUB_USER = "mastertj994";
 const GITHUB_REPO = "neonbeat";
 
 let tracks = [];
-let pendingTracks = [];
 let comments = JSON.parse(localStorage.getItem('neonbeat_comments')) || [
     { name: "Тимур", text: "Отличный сайт!", time: "Только что" }
 ];
@@ -51,14 +50,10 @@ async function loadDataFromGitHub() {
     try {
         const resTracks = await fetch(`https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/tracks.json?t=${Date.now()}`);
         tracks = resTracks.ok ? await resTracks.json() : [];
-
-        const resPending = await fetch(`https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/pending.json?t=${Date.now()}`);
-        pendingTracks = resPending.ok ? await resPending.json() : [];
     } catch (e) {
         console.error("Ошибка загрузки данных:", e);
     }
     renderAdminTracks();
-    renderPendingTracks();
 }
 
 function renderAdminTracks() {
@@ -84,38 +79,6 @@ function renderAdminTracks() {
             <button onclick="deleteTrack(${idx})" class="px-3 py-1.5 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white text-xs font-bold rounded-lg transition shrink-0 ml-2">
                 Удалить
             </button>
-        </div>
-    `).join('');
-}
-
-function renderPendingTracks() {
-    const container = document.getElementById('admin-pending-list');
-    const badge = document.getElementById('pending-count');
-    if (badge) badge.innerText = `${pendingTracks.length} шт.`;
-
-    if (!container) return;
-    if (pendingTracks.length === 0) {
-        container.innerHTML = `<p class="text-xs text-gray-500 text-center py-4">Нет новых заявок</p>`;
-        return;
-    }
-
-    container.innerHTML = pendingTracks.map((t, idx) => `
-        <div class="bg-black/40 border border-neonPurple/40 rounded-xl p-3 flex items-center justify-between">
-            <div class="flex items-center space-x-3 min-w-0">
-                <img src="${t.cover}" class="w-10 h-10 rounded-lg object-cover shrink-0">
-                <div class="min-w-0">
-                    <h4 class="text-xs font-bold text-white truncate">${t.title}</h4>
-                    <p class="text-[11px] text-gray-400 truncate">Артист: ${t.artist} &bull; Гость</p>
-                </div>
-            </div>
-            <div class="flex space-x-1.5 shrink-0 ml-2">
-                <button onclick="approveTrack(${idx})" class="px-2.5 py-1.5 bg-green-500/20 hover:bg-green-500 text-green-400 hover:text-white text-xs font-bold rounded-lg transition">
-                    Одобрить
-                </button>
-                <button onclick="rejectTrack(${idx})" class="px-2.5 py-1.5 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white text-xs font-bold rounded-lg transition">
-                    Удалить
-                </button>
-            </div>
         </div>
     `).join('');
 }
@@ -234,34 +197,6 @@ async function addNewTrack(event) {
         alert("Трек успешно опубликован!");
     } catch (e) {
         alert("Ошибка: " + e.message);
-    }
-}
-
-async function approveTrack(index) {
-    const track = pendingTracks[index];
-    tracks.unshift(track);
-    pendingTracks.splice(index, 1);
-
-    try {
-        await updateJsonFileOnGitHub('tracks.json', tracks);
-        await updateJsonFileOnGitHub('pending.json', pendingTracks);
-        renderAdminTracks();
-        renderPendingTracks();
-        alert("Трек одобрен и добавлен на сайт!");
-    } catch (e) {
-        alert("Ошибка модерации: " + e.message);
-    }
-}
-
-async function rejectTrack(index) {
-    if (confirm("Отклонить заявку и полностью удалить файлы с сервера?")) {
-        const track = pendingTracks[index];
-        await deleteFileFromGitHub(track.audio);
-        await deleteFileFromGitHub(track.cover);
-
-        pendingTracks.splice(index, 1);
-        await updateJsonFileOnGitHub('pending.json', pendingTracks);
-        renderPendingTracks();
     }
 }
 
