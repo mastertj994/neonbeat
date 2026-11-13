@@ -291,38 +291,16 @@ function formatTime(s) {
     return `${m}:${sec < 10 ? '0' : ''}${sec}`;
 }
 
-let comments = JSON.parse(localStorage.getItem('neonbeat_comments')) || [
-    { name: "Тимур", text: "Отличный сайт!", time: "Только что" }
-];
-
-function loadComments() {
-    const commentsList = document.getElementById('commentsList');
-    if (!commentsList) return;
-    commentsList.innerHTML = comments.map(c => `
-        <div class="bg-black/30 border border-gray-800 rounded-xl p-2 text-xs">
-            <span class="font-bold text-neonPurple">${c.name}</span>: <span class="text-gray-300">${c.text}</span>
-        </div>
-    `).join('');
-}
-
-// Загрузка комментариев (объединяем локальные и те, что пришли с GitHub, если нужно)
 async function loadComments() {
     const commentsList = document.getElementById('commentsList');
     if (!commentsList) return;
 
     try {
-        // Сначала берем комментарии, сохраненные локально у пользователя
         let localComments = JSON.parse(localStorage.getItem('neonbeat_comments')) || [];
-
-        // Пытаемся подгрузить общие с GitHub
         const response = await fetch(`https://raw.githubusercontent.com/mastertj994/neonbeat/main/comments.json?t=${Date.now()}`);
         let githubComments = response.ok ? await response.json() : [];
 
-        // Объединяем их (локальные свежие сверху, затем с GitHub)
-        // Уникализируем по тексту и имени, чтобы не было дублей
         let allComments = [...localComments, ...githubComments];
-        
-        // Убираем возможные дубликаты по времени/тексту
         let uniqueComments = Array.from(new Set(allComments.map(c => c.text + c.name)))
             .map(key => allComments.find(c => (c.text + c.name) === key));
 
@@ -336,13 +314,11 @@ async function loadComments() {
                 <span class="font-bold text-neonPurple">${escapeHtml(c.name)}</span>: <span class="text-gray-300">${escapeHtml(c.text)}</span>
             </div>
         `).join('');
-
     } catch (e) {
         console.error("Ошибка загрузки комментариев:", e);
     }
 }
 
-// Мгновенное добавление комментария без модерации
 function addComment(e) {
     e.preventDefault();
     const guestNameInput = document.getElementById('guestName');
@@ -353,17 +329,10 @@ function addComment(e) {
     const text = commentTextInput.value.trim();
     if (!name || !text) return;
 
-    // Читаем текущие локальные комментарии
     let localComments = JSON.parse(localStorage.getItem('neonbeat_comments')) || [];
-
-    // Добавляем новый комментарий в самый верх списка
-    const newComment = { name, text, time: "Только что" };
-    localComments.unshift(newComment);
-
-    // Сохраняем обратно в localStorage
+    localComments.unshift({ name, text, time: "Только что" });
     localStorage.setItem('neonbeat_comments', JSON.stringify(localComments));
 
-    // Очищаем форму и сразу обновляем список на экране
     guestNameInput.value = '';
     commentTextInput.value = '';
     loadComments();
@@ -373,5 +342,4 @@ function escapeHtml(str) {
     return str.replace(/[&<>'"]/g, 
         tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
     );
-}
 }
