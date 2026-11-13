@@ -363,3 +363,15 @@ function escapeHtml(str) {
 setInterval(() => {
     loadComments();
 }, 3000);
+window.addEventListener('load', () => {
+    const splash = document.getElementById('splash-screen');
+    if (splash) {
+        // Небольшая задержка (например, 1.2 секунды), чтобы пользователь успел насладиться заставкой
+        setTimeout(() => {
+            splash.style.opacity = '0'; // Делаем прозрачной
+            setTimeout(() => {
+                splash.style.display = 'none'; // Полностью убираем из потока страницы
+            }, 700); // Время совпадает с duration-700 в Tailwind
+        }, 1200);
+    }
+});
