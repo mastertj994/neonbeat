@@ -101,3 +101,31 @@ body {
     /* Тоже ставим 9 секунд */
     animation: neonTextMove 9s ease infinite;
 }
+@keyframes neonTextMove {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.animated-neon-text {
+    background: linear-gradient(270deg, #00f2fe, #ffffff, #fe0095, #00f2fe);
+    background-size: 300% 300%;
+    
+    /* Применяем маску градиента для текста */
+    -webkit-background-clip: text;
+    background-clip: text;
+    
+    /* Делаем сам текст прозрачным, чтобы был виден фоновый градиент */
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    
+    /* Скорость перелива (9 секунд) */
+    animation: neonTextMove 9s ease infinite;
+}
+
