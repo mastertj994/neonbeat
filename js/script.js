@@ -305,19 +305,73 @@ function loadComments() {
     `).join('');
 }
 
+// Загрузка комментариев (объединяем локальные и те, что пришли с GitHub, если нужно)
+async function loadComments() {
+    const commentsList = document.getElementById('commentsList');
+    if (!commentsList) return;
+
+    try {
+        // Сначала берем комментарии, сохраненные локально у пользователя
+        let localComments = JSON.parse(localStorage.getItem('neonbeat_comments')) || [];
+
+        // Пытаемся подгрузить общие с GitHub
+        const response = await fetch(`https://raw.githubusercontent.com/mastertj994/neonbeat/main/comments.json?t=${Date.now()}`);
+        let githubComments = response.ok ? await response.json() : [];
+
+        // Объединяем их (локальные свежие сверху, затем с GitHub)
+        // Уникализируем по тексту и имени, чтобы не было дублей
+        let allComments = [...localComments, ...githubComments];
+        
+        // Убираем возможные дубликаты по времени/тексту
+        let uniqueComments = Array.from(new Set(allComments.map(c => c.text + c.name)))
+            .map(key => allComments.find(c => (c.text + c.name) === key));
+
+        if (uniqueComments.length === 0) {
+            commentsList.innerHTML = `<p class="text-gray-500 text-xs text-center py-2">Пока нет комментариев. Оставь первый!</p>`;
+            return;
+        }
+
+        commentsList.innerHTML = uniqueComments.map(c => `
+            <div class="bg-black/30 border border-gray-800 rounded-xl p-2 text-xs">
+                <span class="font-bold text-neonPurple">${escapeHtml(c.name)}</span>: <span class="text-gray-300">${escapeHtml(c.text)}</span>
+            </div>
+        `).join('');
+
+    } catch (e) {
+        console.error("Ошибка загрузки комментариев:", e);
+    }
+}
+
+// Мгновенное добавление комментария без модерации
 function addComment(e) {
     e.preventDefault();
     const guestNameInput = document.getElementById('guestName');
     const commentTextInput = document.getElementById('commentText');
     if (!guestNameInput || !commentTextInput) return;
 
-    const n = guestNameInput.value.trim();
-    const t = commentTextInput.value.trim();
-    if (n && t) {
-        comments.unshift({ name: n, text: t, time: "Только что" });
-        localStorage.setItem('neonbeat_comments', JSON.stringify(comments));
-        guestNameInput.value = '';
-        commentTextInput.value = '';
-        loadComments();
-    }
+    const name = guestNameInput.value.trim();
+    const text = commentTextInput.value.trim();
+    if (!name || !text) return;
+
+    // Читаем текущие локальные комментарии
+    let localComments = JSON.parse(localStorage.getItem('neonbeat_comments')) || [];
+
+    // Добавляем новый комментарий в самый верх списка
+    const newComment = { name, text, time: "Только что" };
+    localComments.unshift(newComment);
+
+    // Сохраняем обратно в localStorage
+    localStorage.setItem('neonbeat_comments', JSON.stringify(localComments));
+
+    // Очищаем форму и сразу обновляем список на экране
+    guestNameInput.value = '';
+    commentTextInput.value = '';
+    loadComments();
+}
+
+function escapeHtml(str) {
+    return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+    );
+}
 }
