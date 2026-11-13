@@ -286,4 +286,74 @@ function updateProgress() {
 }
 
 function formatTime(s) {
-    const m = Math.floor(s / 6
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+}
+
+// Облачное хранилище npoint для автоматических комментариев
+const COMMENTS_API_URL = 'https://api.npoint.io/4bb8f6962a133ee29f89';
+
+async function loadComments() {
+    const commentsList = document.getElementById('commentsList');
+    if (!commentsList) return;
+
+    try {
+        const response = await fetch(`${COMMENTS_API_URL}?t=${Date.now()}`);
+        if (response.ok) {
+            let comments = await response.json();
+
+            if (!Array.isArray(comments) || comments.length === 0) {
+                commentsList.innerHTML = `<p class="text-gray-500 text-xs text-center py-2">Пока нет комментариев. Оставь первый!</p>`;
+                return;
+            }
+
+            commentsList.innerHTML = comments.map(c => `
+                <div class="bg-black/30 border border-gray-800 rounded-xl p-2 text-xs">
+                    <span class="font-bold text-neonPurple">${escapeHtml(c.name)}</span>: <span class="text-gray-300">${escapeHtml(c.text)}</span>
+                </div>
+            `).join('');
+        }
+    } catch (e) {
+        console.error("Ошибка загрузки комментариев:", e);
+    }
+}
+
+async function addComment(e) {
+    e.preventDefault();
+    const guestNameInput = document.getElementById('guestName');
+    const commentTextInput = document.getElementById('commentText');
+    if (!guestNameInput || !commentTextInput) return;
+
+    const name = guestNameInput.value.trim();
+    const text = commentTextInput.value.trim();
+    if (!name || !text) return;
+
+    try {
+        let res = await fetch(COMMENTS_API_URL);
+        let comments = res.ok ? await res.json() : [];
+        if (!Array.isArray(comments)) comments = [];
+
+        comments.unshift({ name, text, time: "Только что" });
+
+        await fetch(COMMENTS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(comments)
+        });
+
+        guestNameInput.value = '';
+        commentTextInput.value = '';
+        loadComments();
+        
+    } catch (err) {
+        console.error("Ошибка при отправке:", err);
+        alert("Не удалось отправить комментарий. Попробуйте еще раз.");
+    }
+}
+
+function escapeHtml(str) {
+    return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+    );
+}
