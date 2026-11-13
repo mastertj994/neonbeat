@@ -83,6 +83,18 @@
         </header>
 
         <main class="max-w-5xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <section class="bg-panelBg border border-neonPurple/40 rounded-2xl p-5 shadow-[0_0_20px_rgba(157,78,221,0.1)]">
+    <h2 class="text-sm font-bold text-white mb-4 flex items-center justify-between">
+        <span class="flex items-center space-x-2">
+            <i class="fa-solid fa-user-clock text-neonPurple"></i>
+            <span>Заявки от гостей на модерацию</span>
+        </span>
+        <span id="pending-count" class="text-xs text-neonPurple font-mono">0 шт.</span>
+    </h2>
+    <div id="admin-pending-list" class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+        <!-- Сюда падают заявки -->
+    </div>
+</section>
             
             <!-- Блок 1: Добавление нового трека -->
             <section class="bg-panelBg border border-neonPink/40 rounded-2xl p-5 shadow-[0_0_20px_rgba(254,0,149,0.1)] h-fit">
