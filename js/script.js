@@ -38,7 +38,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         });
     }
 });
-}
+
 async function loadTracksFromGitHub() {
     try {
         const response = await fetch(`https://raw.githubusercontent.com/mastertj994/neonbeat/main/tracks.json?t=${Date.now()}`);
@@ -291,7 +291,7 @@ function formatTime(s) {
     return `${m}:${sec < 10 ? '0' : ''}${sec}`;
 }
 
-// Облачное хранилище npoint для автоматических комментариев
+// ==================== КОММЕНТАРИИ (С ОБЛАКОМ И АВТООБНОВЛЕНИЕМ) ====================
 const COMMENTS_API_URL = 'https://api.npoint.io/4bb8f6962a133ee29f89';
 
 async function loadComments() {
@@ -357,3 +357,8 @@ function escapeHtml(str) {
         tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
     );
 }
+
+// Автоматическое обновление ленты комментариев каждые 3 секунды в фоновом режиме
+setInterval(() => {
+    loadComments();
+}, 3000);
