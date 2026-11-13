@@ -382,3 +382,35 @@ if (document.readyState === 'complete') {
 
 // Страховка: если через 3 секунды заставка всё еще висит — принудительно гасим её
 setTimeout(hideSplash, 3000);
+// Функция обновления данных для экрана блокировки и шторки уведомлений
+function updateMediaSession(track) {
+    // Проверяем, поддерживает ли браузер Media Session API
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: track.title,
+            artist: track.artist || 'NeonBeat',
+            album: 'NeonBeat Music Portal',
+            artwork: [
+                { src: track.cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=512&auto=format&fit=crop&q=80', sizes: '512x512', type: 'image/jpeg' }
+            ]
+        });
+
+        // Привязываем кнопки «Следующий» и «Предыдущий» трек на экране блокировки
+        navigator.mediaSession.setActionHandler('nexttrack', function() {
+            nextTrack(); // Вызывает твою функцию переключения вперед
+        });
+
+        navigator.mediaSession.setActionHandler('previoustrack', function() {
+            prevTrack(); // Вызывает твою функцию переключения назад
+        });
+
+        // Также можно добавить управление воспроизведением/паузой
+        navigator.mediaSession.setActionHandler('play', function() {
+            togglePlay();
+        });
+        navigator.mediaSession.setActionHandler('pause', function() {
+            togglePlay();
+        });
+    }
+}
+
