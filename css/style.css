@@ -74,4 +74,23 @@ body {
 .neon-pulse-border {
     animation: neonPulse 3s infinite ease-in-out;
 }
+@keyframes neonMoveRight {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.animated-neon-logo {
+    /* Делаем большой градиент, который будет двигаться */
+    background: linear-gradient(270deg, #00f2fe, #9d4edd, #fe0095, #00f2fe);
+    background-size: 300% 300%;
+    animation: neonMoveRight 4s ease infinite;
+}
+
 
