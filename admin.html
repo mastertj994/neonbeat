@@ -26,7 +26,7 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-neonPink selection:text-white bg-darkBg text-white">
 
-    <!-- ЭКРАН АВТОРИЗАЦИИ (Оставлен на 100% без изменений) -->
+    <!-- ЭКРАН АВТОРИЗАЦИИ -->
     <div id="login-screen" class="flex-1 flex items-center justify-center p-4">
         <div class="w-full max-w-sm bg-panelBg border border-neonPink/40 rounded-2xl p-6 shadow-[0_0_30px_rgba(254,0,149,0.2)]">
             <div class="flex items-center justify-center space-x-2 mb-6">
@@ -85,153 +85,97 @@
             </div>
         </header>
 
-        <main class="max-w-5xl w-full mx-auto p-4 md:p-6 space-y-6">
-            
-            <!-- СЧЁТЧИК ПОСЕТИТЕЛЕЙ (Вставлен самым первым в рабочей панели) -->
-            <section class="bg-panelBg border border-gray-800 rounded-2xl p-4 shadow-lg">
-                <div class="flex items-center justify-between mb-3">
-                    <h2 class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center space-x-1.5">
-                        <i class="fa-solid fa-chart-line text-neonCyan"></i>
-                        <span>Системная статистика NeonBeat</span>
-                    </h2>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-neonCyan/10 text-neonCyan border border-neonCyan/20">
-                        <span class="w-1.5 h-1.5 rounded-full bg-neonCyan animate-ping mr-1.5"></span>
-                        LIVE
-                    </span>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <!-- Всего визитов -->
-                    <div class="bg-black/40 border border-gray-800/80 rounded-xl p-3 flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-xl bg-neonCyan/10 text-neonCyan flex items-center justify-center text-base shrink-0">
-                            <i class="fa-solid fa-users"></i>
+        <main class="max-w-5xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Блок 1: Добавление нового трека -->
+            <section class="bg-panelBg border border-neonPink/40 rounded-2xl p-5 shadow-[0_0_20px_rgba(254,0,149,0.1)] h-fit">
+                <h2 class="text-sm font-bold text-white mb-4 flex items-center space-x-2">
+                    <i class="fa-solid fa-cloud-arrow-up text-neonPink"></i>
+                    <span>Добавить новый трек в плейлист</span>
+                </h2>
+                <form onsubmit="addNewTrack(event)" class="space-y-3.5">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Название трека</label>
+                        <input type="text" id="newTitle" placeholder="Например: Ночной Душанбе" required class="w-full bg-black/50 border border-gray-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-neonPink">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Исполнитель</label>
+                        <input type="text" id="newArtist" placeholder="Имя артиста" required class="w-full bg-black/50 border border-gray-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-neonPink">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Страна</label>
+                            <select id="newCountry" class="w-full bg-black/50 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                                <option value="Россия">Россия</option>
+                                <option value="Узбекистан">Узбекистан</option>
+                                <option value="Таджикистан">Таджикистан</option>
+                            </select>
                         </div>
-                        <div class="min-w-0">
-                            <p class="text-[10px] uppercase tracking-wider text-gray-400 truncate">Всего визитов</p>
-                            <h3 id="admin-total-visitors" class="text-base font-bold text-white tracking-wide">Загрузка...</h3>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Жанр</label>
+                            <select id="newGenre" class="w-full bg-black/50 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                                <option value="Хип-хоп">Хип-хоп</option>
+                                <option value="Поп">Поп</option>
+                                <option value="Рок">Рок</option>
+                                <option value="Электроника">Электроника</option>
+                            </select>
                         </div>
                     </div>
-
-                    <!-- Статус узла -->
-                    <div class="bg-black/40 border border-gray-800/80 rounded-xl p-3 flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-xl bg-neonPink/10 text-neonPink flex items-center justify-center text-base shrink-0">
-                            <i class="fa-solid fa-server"></i>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Аудиофайл (MP3)</label>
+                        <input type="file" id="audioFile" accept="audio/mp3,audio/*" required class="w-full bg-black/50 border border-gray-700 rounded-xl px-3 py-1.5 text-xs text-gray-300 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-neonPink file:text-white hover:file:opacity-90">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Обложка трека (Картинка)</label>
+                        <input type="file" id="coverFile" accept="image/*" class="w-full bg-black/50 border border-gray-700 rounded-xl px-3 py-1.5 text-xs text-gray-300 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-neonCyan file:text-gray-950 hover:file:opacity-90">
+                    </div>
+                    <div id="uploadProgressBox" class="hidden space-y-1 my-3">
+                        <div class="flex justify-between text-[11px] text-gray-400">
+                            <span id="uploadStatusText">Подготовка файла...</span>
+                            <span id="uploadPercentText" class="text-neonCyan font-bold">0%</span>
                         </div>
-                        <div class="min-w-0">
-                            <p class="text-[10px] uppercase tracking-wider text-gray-400 truncate">Статус узла</p>
-                            <h3 class="text-base font-bold text-neonPink tracking-wide">ONLINE</h3>
+                        <div class="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
+                            <div id="uploadProgressBar" class="bg-gradient-to-r from-neonCyan to-neonPink h-full transition-all duration-150" style="width: 0%"></div>
                         </div>
                     </div>
-                </div>
+                    
+                    <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-neonCyan to-neonPink text-gray-950 font-bold rounded-xl text-xs shadow-lg mt-2 hover:opacity-95 transition">
+                        Загрузить и опубликовать
+                    </button>
+                </form>
             </section>
 
-            <!-- ДАЛЬШЕ ТВОЯ СЕТКА С УПРАВЛЕНИЕМ (Точь-в-точь как ты присылал) -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Блок 1: Добавление нового трека -->
-                <section class="bg-panelBg border border-neonPink/40 rounded-2xl p-5 shadow-[0_0_20px_rgba(254,0,149,0.1)] h-fit">
-                    <h2 class="text-sm font-bold text-white mb-4 flex items-center space-x-2">
-                        <i class="fa-solid fa-cloud-arrow-up text-neonPink"></i>
-                        <span>Добавить новый трек в плейлист</span>
+            <!-- Блок 2: Управление треками и отзывами -->
+            <div class="space-y-6">
+                <section class="bg-panelBg border border-gray-800 rounded-2xl p-5">
+                    <h2 class="text-sm font-bold text-white mb-4 flex items-center justify-between">
+                        <span class="flex items-center space-x-2">
+                            <i class="fa-solid fa-list-ul text-neonCyan"></i>
+                            <span>Управление плейлистом</span>
+                        </span>
+                        <span id="tracks-count" class="text-xs text-neonCyan font-mono">0 шт.</span>
                     </h2>
-                    <form onsubmit="addNewTrack(event)" class="space-y-3.5">
-                        <div>
-                            <label class="block text-xs text-gray-400 mb-1">Название трека</label>
-                            <input type="text" id="newTitle" placeholder="Например: Ночной Душанбе" required class="w-full bg-black/50 border border-gray-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-neonPink">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-gray-400 mb-1">Исполнитель</label>
-                            <input type="text" id="newArtist" placeholder="Имя артиста" required class="w-full bg-black/50 border border-gray-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-neonPink">
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1">Страна</label>
-                                <select id="newCountry" class="w-full bg-black/50 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
-                                    <option value="Россия">Россия</option>
-                                    <option value="Узбекистан">Узбекистан</option>
-                                    <option value="Таджикистан">Таджикистан</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1">Жанр</label>
-                                <select id="newGenre" class="w-full bg-black/50 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
-                                    <option value="Хип-хоп">Хип-хоп</option>
-                                    <option value="Поп">Поп</option>
-                                    <option value="Рок">Рок</option>
-                                    <option value="Электроника">Электроника</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs text-gray-400 mb-1">Аудиофайл (MP3)</label>
-                            <input type="file" id="audioFile" accept="audio/mp3,audio/*" required class="w-full bg-black/50 border border-gray-700 rounded-xl px-3 py-1.5 text-xs text-gray-300 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-neonPink file:text-white hover:file:opacity-90">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-gray-400 mb-1">Обложка трека (Картинка)</label>
-                            <input type="file" id="coverFile" accept="image/*" class="w-full bg-black/50 border border-gray-700 rounded-xl px-3 py-1.5 text-xs text-gray-300 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-neonCyan file:text-gray-950 hover:file:opacity-90">
-                        </div>
-                        <div id="uploadProgressBox" class="hidden space-y-1 my-3">
-                            <div class="flex justify-between text-[11px] text-gray-400">
-                                <span id="uploadStatusText">Подготовка файла...</span>
-                                <span id="uploadPercentText" class="text-neonCyan font-bold">0%</span>
-                            </div>
-                            <div class="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
-                                <div id="uploadProgressBar" class="bg-gradient-to-r from-neonCyan to-neonPink h-full transition-all duration-150" style="width: 0%"></div>
-                            </div>
-                        </div>
-                        
-                        <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-neonCyan to-neonPink text-gray-950 font-bold rounded-xl text-xs shadow-lg mt-2 hover:opacity-95 transition">
-                            Загрузить и опубликовать
-                        </button>
-                    </form>
+                    <div id="admin-tracks-list" class="space-y-2.5 max-h-80 overflow-y-auto pr-1">
+                        <!-- Список треков -->
+                    </div>
                 </section>
 
-                <!-- Блок 2: Управление треками и отзывами -->
-                <div class="space-y-6">
-                    <section class="bg-panelBg border border-gray-800 rounded-2xl p-5">
-                        <h2 class="text-sm font-bold text-white mb-4 flex items-center justify-between">
-                            <span class="flex items-center space-x-2">
-                                <i class="fa-solid fa-list-ul text-neonCyan"></i>
-                                <span>Управление плейлистом</span>
-                            </span>
-                            <span id="tracks-count" class="text-xs text-neonCyan font-mono">0 шт.</span>
-                        </h2>
-                        <div id="admin-tracks-list" class="space-y-2.5 max-h-80 overflow-y-auto pr-1">
-                            <!-- Список треков -->
-                        </div>
-                    </section>
-
-                    <section class="bg-panelBg border border-gray-800 rounded-2xl p-5">
-                        <h2 class="text-sm font-bold text-white mb-4 flex items-center justify-between">
-                            <span class="flex items-center space-x-2">
-                                <i class="fa-solid fa-comments text-neonPurple"></i>
-                                <span>Комментарии гостей</span>
-                            </span>
-                            <span id="comments-count" class="text-xs text-neonPurple font-mono">0 шт.</span>
-                        </h2>
-                        <div id="admin-comments-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
-                            <!-- Список комментариев -->
-                        </div>
-                    </section>
-                </div>
+                <section class="bg-panelBg border border-gray-800 rounded-2xl p-5">
+                    <h2 class="text-sm font-bold text-white mb-4 flex items-center justify-between">
+                        <span class="flex items-center space-x-2">
+                            <i class="fa-solid fa-comments text-neonPurple"></i>
+                            <span>Комментарии гостей</span>
+                        </span>
+                        <span id="comments-count" class="text-xs text-neonPurple font-mono">0 шт.</span>
+                    </h2>
+                    <div id="admin-comments-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                        <!-- Список комментариев -->
+                    </div>
+                </section>
             </div>
         </main>
     </div>
 
-    <!-- Скрипт счётчика (работает в фоне, не мешая логину) -->
-    <script>
-        fetch('https://api.counterapi.dev/v1/neonbeat-portal/visitors/up')
-            .then(response => response.json())
-            .then(data => {
-                const counterEl = document.getElementById('admin-total-visitors');
-                if (counterEl) counterEl.textContent = data.count.toLocaleString();
-            })
-            .catch(error => {
-                const counterEl = document.getElementById('admin-total-visitors');
-                if (counterEl) counterEl.textContent = '—';
-            });
-    </script>
-
-    <!-- Основной скрипт админки -->
     <script src="js/admin.js"></script>
 </body>
 </html>
+ 
