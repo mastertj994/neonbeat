@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": 1794560867268,
+    "title": "Туро дидам!",
+    "artist": "Баха84",
+    "country": "Таджикистан",
+    "genre": "Хип-хоп",
+    "duration": "3:15",
+    "cover": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&auto=format&fit=crop&q=80",
+    "audio": "https://raw.githubusercontent.com/mastertj994/neonbeat/main/music/1794560842772_Bakha_84_turo_didam_-_11_62765527.mp3"
+  }
+]
