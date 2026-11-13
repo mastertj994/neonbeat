@@ -61,7 +61,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         });
     }
 });
-
+}
 async function loadTracksFromGitHub() {
     try {
         const response = await fetch(`https://raw.githubusercontent.com/mastertj994/neonbeat/main/tracks.json?t=${Date.now()}`);
