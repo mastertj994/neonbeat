@@ -307,7 +307,8 @@ async function loadComments() {
                 commentsList.innerHTML = `<p class="text-gray-500 text-xs text-center py-2">Пока нет комментариев. Оставь первый!</p>`;
                 return;
             }
-
+// 👇 ОГРАНИЧЕНИЕ: показываем только последние 15 комментариев (можешь поменять число на любое другое)
+            comments = comments.slice(0, 15);
             commentsList.innerHTML = comments.map(c => `
                 <div class="bg-black/30 border border-gray-800 rounded-xl p-2 text-xs">
                     <span class="font-bold text-neonPurple">${escapeHtml(c.name)}</span>: <span class="text-gray-300">${escapeHtml(c.text)}</span>
