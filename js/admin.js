@@ -15,18 +15,22 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function handleLogin(event) {
     event.preventDefault();
-    const login = document.getElementById('adminLoginInput').value;
-    const pass = document.getElementById('adminPassInput').value;
-    const token = document.getElementById('adminTokenInput') ? document.getElementById('adminTokenInput').value : '';
+    const login = document.getElementById('adminLoginInput').value.trim();
+    const pass = document.getElementById('adminPassInput').value.trim();
+    const tokenInput = document.getElementById('adminTokenInput');
+    const token = tokenInput ? tokenInput.value.trim() : '';
     const errorMsg = document.getElementById('login-error');
 
-    if (login === 'admin' && pass === 'neon2026') {
+    if (login === 'admin' && pass === 'neon2026' && token !== '') {
         sessionStorage.setItem('neonbeat_admin_auth', 'true');
-        if (token) localStorage.setItem('neonbeat_gh_token', token);
-        errorMsg.classList.add('hidden');
+        localStorage.setItem('neonbeat_gh_token', token);
+        if (errorMsg) errorMsg.classList.add('hidden');
         showDashboard();
     } else {
-        errorMsg.classList.remove('hidden');
+        if (errorMsg) {
+            errorMsg.innerText = "Неверный логин, пароль или пустой токен!";
+            errorMsg.classList.remove('hidden');
+        }
     }
 }
 
@@ -59,8 +63,10 @@ async function loadDataFromGitHub() {
 
 function renderAdminTracks() {
     const container = document.getElementById('admin-tracks-list');
-    document.getElementById('tracks-count').innerText = `${tracks.length} шт.`;
+    const countEl = document.getElementById('tracks-count');
+    if (countEl) countEl.innerText = `${tracks.length} шт.`;
 
+    if (!container) return;
     if (tracks.length === 0) {
         container.innerHTML = `<p class="text-xs text-gray-500 text-center py-4">Плейлист пуст</p>`;
         return;
@@ -148,12 +154,10 @@ async function uploadFileToGitHub(path, base64Content) {
     return resData.content.download_url;
 }
 
-// Физическое удаление файла из репозитория GitHub по его URL
 async function deleteFileFromGitHub(fileUrl) {
     if (!fileUrl || !fileUrl.includes(`/${GITHUB_USER}/${GITHUB_REPO}/`)) return;
 
     const token = localStorage.getItem('neonbeat_gh_token');
-    // Извлекаем относительный путь (например, music/12345_song.mp3)
     const parts = fileUrl.split('/main/');
     if (parts.length < 2) return;
     const filePath = decodeURIComponent(parts[1]);
@@ -167,14 +171,8 @@ async function deleteFileFromGitHub(fileUrl) {
 
         await fetch(url, {
             method: 'DELETE',
-            headers: {
-                Authorization: `token ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                message: `Delete ${filePath}`,
-                sha: fileData.sha
-            })
+            headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: `Delete ${filePath}`, sha: fileData.sha })
         });
     } catch (e) {
         console.error("Не удалось удалить файл:", filePath, e);
@@ -192,4 +190,108 @@ async function updateJsonFileOnGitHub(path, dataArray) {
         sha = fileData.sha;
     }
 
-    const jsonString = JSON.stringify
+    const jsonString = JSON.stringify(dataArray, null, 2);
+    const base64Content = btoa(unescape(encodeURIComponent(jsonString)));
+
+    const bodyData = { message: `Update ${path}`, content: base64Content };
+    if (sha) bodyData.sha = sha;
+
+    const response = await fetch(url, {
+        method: 'PUT',
+        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(bodyData)
+    });
+
+    if (!response.ok) throw new Error(`Ошибка обновления ${path}`);
+}
+
+async function addNewTrack(event) {
+    event.preventDefault();
+    const title = document.getElementById('newTitle').value;
+    const artist = document.getElementById('newArtist').value;
+    const country = document.getElementById('newCountry').value;
+    const genre = document.getElementById('newGenre').value;
+    const audioInput = document.getElementById('audioFile');
+    const coverInput = document.getElementById('coverFile');
+
+    if (!audioInput.files[0]) { alert("Выберите аудио!"); return; }
+
+    try {
+        alert("Загрузка...");
+        const audioBase64 = await fileToBase64(audioInput.files[0]);
+        const audioUrl = await uploadFileToGitHub(`music/${Date.now()}_${audioInput.files[0].name}`, audioBase64);
+
+        let coverUrl = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&auto=format&fit=crop&q=80";
+        if (coverInput.files && coverInput.files[0]) {
+            const coverBase64 = await fileToBase64(coverInput.files[0]);
+            coverUrl = await uploadFileToGitHub(`covers/${Date.now()}_${coverInput.files[0].name}`, coverBase64);
+        }
+
+        tracks.unshift({ id: Date.now(), title, artist, country, genre, duration: "3:15", cover: coverUrl, audio: audioUrl });
+        await updateJsonFileOnGitHub('tracks.json', tracks);
+        event.target.reset();
+        renderAdminTracks();
+        alert("Трек успешно опубликован!");
+    } catch (e) {
+        alert("Ошибка: " + e.message);
+    }
+}
+
+async function approveTrack(index) {
+    const track = pendingTracks[index];
+    tracks.unshift(track);
+    pendingTracks.splice(index, 1);
+
+    try {
+        await updateJsonFileOnGitHub('tracks.json', tracks);
+        await updateJsonFileOnGitHub('pending.json', pendingTracks);
+        renderAdminTracks();
+        renderPendingTracks();
+        alert("Трек одобрен и добавлен на сайт!");
+    } catch (e) {
+        alert("Ошибка модерации: " + e.message);
+    }
+}
+
+async function rejectTrack(index) {
+    if (confirm("Отклонить заявку и полностью удалить файлы с сервера?")) {
+        const track = pendingTracks[index];
+        await deleteFileFromGitHub(track.audio);
+        await deleteFileFromGitHub(track.cover);
+
+        pendingTracks.splice(index, 1);
+        await updateJsonFileOnGitHub('pending.json', pendingTracks);
+        renderPendingTracks();
+    }
+}
+
+async function deleteTrack(index) {
+    if (confirm("Удалить трек из плейлиста и стереть его файлы с GitHub?")) {
+        const track = tracks[index];
+        await deleteFileFromGitHub(track.audio);
+        await deleteFileFromGitHub(track.cover);
+
+        tracks.splice(index, 1);
+        await updateJsonFileOnGitHub('tracks.json', tracks);
+        renderAdminTracks();
+    }
+}
+
+function renderAdminComments() {
+    const container = document.getElementById('admin-comments-list');
+    const commentsCount = document.getElementById('comments-count');
+    if (commentsCount) commentsCount.innerText = `${comments.length} шт.`;
+    if (!container) return;
+    container.innerHTML = comments.map((c, idx) => `
+        <div class="bg-black/40 border border-gray-800 rounded-xl p-2.5 flex items-center justify-between text-xs">
+            <div><span class="font-bold text-neonPurple">${c.name}</span>: ${c.text}</div>
+            <button onclick="deleteComment(${idx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+        </div>
+    `).join('');
+}
+
+function deleteComment(index) {
+    comments.splice(index, 1);
+    localStorage.setItem('neonbeat_comments', JSON.stringify(comments));
+    renderAdminComments();
+}
