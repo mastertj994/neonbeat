@@ -68,21 +68,104 @@ function renderAdminTracks() {
     }
 
     container.innerHTML = tracks.map((t, idx) => `
-        <div class="bg-black/40 border border-gray-800 rounded-xl p-3 flex items-center justify-between">
-            <div class="flex items-center space-x-3 min-w-0">
-                <img src="${t.cover}" class="w-10 h-10 rounded-lg object-cover shrink-0">
-                <div class="min-w-0">
-                    <h4 class="text-xs font-bold text-white truncate">${t.title}</h4>
-                    <p class="text-[11px] text-gray-400 truncate">${t.artist} &bull; <span class="text-neonPink">${t.country}</span></p>
+        <div class="bg-black/40 border border-gray-800 rounded-xl p-3 flex flex-col space-y-2 transition hover:border-neonCyan/30">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3 min-w-0">
+                    <img src="${t.cover}" class="w-10 h-10 rounded-lg object-cover shrink-0">
+                    <div class="min-w-0">
+                        <h4 class="text-xs font-bold text-white truncate">${t.title}</h4>
+                        <p class="text-[11px] text-gray-400 truncate">${t.artist} &bull; <span class="text-neonPink">${t.country}</span></p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2 shrink-0">
+                    <button onclick="toggleAdminPlay('${t.audio}', ${idx})" id="admin-play-btn-${idx}" class="w-8 h-8 rounded-lg bg-gray-800 hover:bg-neonCyan hover:text-gray-950 text-neonCyan flex items-center justify-center text-xs transition">
+                        <i class="fa-solid fa-play" id="admin-play-icon-${idx}"></i>
+                    </button>
+                    <button onclick="deleteTrack(${idx})" class="px-3 py-1.5 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white text-xs font-bold rounded-lg transition">
+                        Удалить
+                    </button>
                 </div>
             </div>
-            <button onclick="deleteTrack(${idx})" class="px-3 py-1.5 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white text-xs font-bold rounded-lg transition shrink-0 ml-2">
-                Удалить
-            </button>
+            <!-- Мини-плеер (скрыт по умолчанию) -->
+            <div id="admin-mini-player-${idx}" class="hidden pt-2 border-t border-gray-800/60 flex items-center space-x-3">
+                <audio id="admin-audio-${idx}" src="${t.audio}" ontimeupdate="updateAdminProgress(${idx})" onended="stopAdminPlay(${idx})"></audio>
+                <span id="admin-current-time-${idx}" class="text-[10px] text-gray-400 font-mono w-8 text-right">0:00</span>
+                <input type="range" id="admin-progress-${idx}" value="0" max="100" step="0.1" oninput="seekAdminAudio(${idx})" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-neonCyan">
+                <span id="admin-total-time-${idx}" class="text-[10px] text-gray-400 font-mono w-8">0:00</span>
+            </div>
         </div>
     `).join('');
 }
 
+// Управление воспроизведением мини-плеера в админке
+let currentAdminAudio = null;
+let currentAdminIdx = null;
+
+function toggleAdminPlay(audioUrl, idx) {
+    const audioElement = document.getElementById(`admin-audio-${idx}`);
+    const miniPlayer = document.getElementById(`admin-mini-player-${idx}`);
+    const playIcon = document.getElementById(`admin-play-icon-${idx}`);
+
+    // Если уже играет другой трек — остановим его
+    if (currentAdminAudio && currentAdminAudio !== audioElement) {
+        currentAdminAudio.pause();
+        if (currentAdminIdx !== null) {
+            const prevIcon = document.getElementById(`admin-play-icon-${currentAdminIdx}`);
+            const prevPlayer = document.getElementById(`admin-mini-player-${currentAdminIdx}`);
+            if (prevIcon) prevIcon.className = "fa-solid fa-play";
+            if (prevPlayer) prevPlayer.classList.add('hidden');
+        }
+    }
+
+    if (audioElement.paused) {
+        audioElement.play();
+        miniPlayer.classList.remove('hidden');
+        playIcon.className = "fa-solid fa-pause";
+        currentAdminAudio = audioElement;
+        currentAdminIdx = idx;
+    } else {
+        audioElement.pause();
+        playIcon.className = "fa-solid fa-play";
+        currentAdminAudio = null;
+        currentAdminIdx = null;
+    }
+}
+
+function updateAdminProgress(idx) {
+    const audio = document.getElementById(`admin-audio-${idx}`);
+    const progressBar = document.getElementById(`admin-progress-${idx}`);
+    const currentTimeEl = document.getElementById(`admin-current-time-${idx}`);
+    const totalTimeEl = document.getElementById(`admin-total-time-${idx}`);
+
+    if (audio && audio.duration) {
+        const progress = (audio.currentTime / audio.duration) * 100;
+        progressBar.value = progress;
+        currentTimeEl.innerText = formatTime(audio.currentTime);
+        totalTimeEl.innerText = formatTime(audio.duration);
+    }
+}
+
+function seekAdminAudio(idx) {
+    const audio = document.getElementById(`admin-audio-${idx}`);
+    const progressBar = document.getElementById(`admin-progress-${idx}`);
+    if (audio && audio.duration) {
+        audio.currentTime = (progressBar.value / 100) * audio.duration;
+    }
+}
+
+function stopAdminPlay(idx) {
+    const playIcon = document.getElementById(`admin-play-icon-${idx}`);
+    if (playIcon) playIcon.className = "fa-solid fa-play";
+    currentAdminAudio = null;
+    currentAdminIdx = null;
+}
+
+// Вспомогательная функция форматирования времени (если её еще нет в файле)
+function formatTime(s) {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+}
 function fileToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
