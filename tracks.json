@@ -1,5 +1,15 @@
 [
   {
+    "id": 1794561739786,
+    "title": "Hustler",
+    "artist": "Demeter",
+    "country": "Россия",
+    "genre": "Хип-хоп",
+    "duration": "3:15",
+    "cover": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&auto=format&fit=crop&q=80",
+    "audio": "https://raw.githubusercontent.com/mastertj994/neonbeat/main/music/1794561722931_Demeter%20-%20Hustler.mp3"
+  },
+  {
     "id": 1794560964639,
     "title": "Туро дидам!",
     "artist": "Баха84",
